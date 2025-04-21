@@ -20,6 +20,7 @@ Proyecto desarrollado con Symfony 7 para conectar freelancers con clientes.
 composer install
 cp .env .env.local
 # configura tu base de datos en .env.local
+```
 
 ## ✍️ Autor
 Miguel Cuadros Toral
