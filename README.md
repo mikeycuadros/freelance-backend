@@ -1,4 +1,4 @@
-# Plataforma de Servicios Freelance
+# Proyecto freelance-backend
 
 Proyecto desarrollado con Symfony 7 para conectar freelancers con clientes.
 
