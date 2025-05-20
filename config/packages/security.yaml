@@ -43,8 +43,27 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+
+        # Public access
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/users, roles: PUBLIC_ACCESS}
+        - { path: ^/api/users/\d+$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/categories, roles: PUBLIC_ACCESS }
+        - { path: ^/api/categories/\d+$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/chats, roles: PUBLIC_ACCESS }
+        - { path: ^/api/chats/\d+$, roles: IS_AUTHENTICATED_FULLY }
+        
+        # Solo ADMIN puede crear, editar o borrar categorias
+        - { path: ^/api/categories$, roles: ROLE_ADMIN, methods: [POST] }
+        - { path: ^/api/categories/\d+$, roles: ROLE_ADMIN, methods: [PUT, DELETE] }
+
+        # Privados (todo lo demás de /api requiere login)
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/users/\d+$, roles: IS_AUTHENTICATED_FULLY, methods: [PUT, DELETE] }
+        - { path: ^/api/chats, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/chats/\d+$, roles: IS_AUTHENTICATED_FULLY }
+        
 
 when@test:
     security:

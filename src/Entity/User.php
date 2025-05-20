@@ -6,48 +6,65 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
-#[UniqueEntity(fields: ['username'], message: 'There is already an account with this username')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read', 'service:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
-    private ?string $username = null;
+    #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['user:read', 'user:write', 'service:read'])]
+    private ?string $email = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['user:write'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $email = null;
+    #[Groups(['user:read', 'user:write', 'service:read'])]
+    private ?string $username = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Service::class, orphanRemoval: true)]
+    #[Groups(['user:read'])]
+    private Collection $services;
+
+    #[ORM\OneToOne(mappedBy: 'userId', cascade: ['persist', 'remove'])]
+    private ?Freelancer $freelancer = null;
+
+    #[ORM\OneToOne(mappedBy: 'userId', cascade: ['persist', 'remove'])]
+    private ?Client $client = null;
 
     /**
-     * @var Collection<int, Service>
+     * @var Collection<int, Message>
      */
-    #[ORM\OneToMany(targetEntity: Service::class, mappedBy: 'user')]
-    private Collection $services;
+    #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'sender')]
+    private Collection $messages;
+
+    /**
+     * @var Collection<int, Chat>
+     */
+    #[ORM\OneToMany(targetEntity: Chat::class, mappedBy: 'user1')]
+    private Collection $chats;
 
     public function __construct()
     {
         $this->services = new ArrayCollection();
+        $this->messages = new ArrayCollection();
+        $this->chats = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -86,7 +103,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        // $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -161,6 +178,110 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($service->getUser() === $this) {
                 $service->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getFreelancer(): ?Freelancer
+    {
+        return $this->freelancer;
+    }
+
+    public function setFreelancer(?Freelancer $freelancer): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($freelancer === null && $this->freelancer !== null) {
+            $this->freelancer->setUserId(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($freelancer !== null && $freelancer->getUserId() !== $this) {
+            $freelancer->setUserId($this);
+        }
+
+        $this->freelancer = $freelancer;
+
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($client === null && $this->client !== null) {
+            $this->client->setUserId(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($client !== null && $client->getUserId() !== $this) {
+            $client->setUserId($this);
+        }
+
+        $this->client = $client;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Message $message): static
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Message $message): static
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getSender() === $this) {
+                $message->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Chat>
+     */
+    public function getChats(): Collection
+    {
+        return $this->chats;
+    }
+
+    public function addChat(Chat $chat): static
+    {
+        if (!$this->chats->contains($chat)) {
+            $this->chats->add($chat);
+            $chat->setUser1($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChat(Chat $chat): static
+    {
+        if ($this->chats->removeElement($chat)) {
+            // set the owning side to null (unless already changed)
+            if ($chat->getUser1() === $this) {
+                $chat->setUser1(null);
             }
         }
 

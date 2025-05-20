@@ -10,35 +10,38 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class SecurityController extends AbstractController
 {
-    // #[Route(path: '/login', name: 'app_login')]
-    // public function login(AuthenticationUtils $authenticationUtils): JsonResponse
-    // {
-    //     // if ($this->getUser()) {
-    //     //     return $this->redirectToRoute('target_path');
-    //     // }
+    #[Route(path: '/login', name: 'app_login')]
+    public function login(AuthenticationUtils $authenticationUtils): JsonResponse
+    {
+        // if ($this->getUser()) {
+        //     return $this->redirectToRoute('target_path');
+        // }
 
-    //     // get the login error if there is one
-    //     $error = $authenticationUtils->getLastAuthenticationError();
-    //     // last username entered by the user
-    //     $lastUsername = $authenticationUtils->getLastUsername();
+        // get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+        // last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
 
-    //     return new JsonResponse([
-    //         'last_username' => $lastUsername,
-    //         'error' => $error ? $error->getMessage() : null
-    //     ]);
-    // }
+        return new JsonResponse([
+            'last_username' => $lastUsername,
+            'error' => $error ? $error->getMessage() : null
+        ]);
+    }
 
-    // #[Route(path: '/logout', name: 'app_logout')]
-    // public function logout(): void
-    // {
-    //     throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
-    // }
+    #[Route(path: '/logout', name: 'app_logout')]
+    public function logout(): void
+    {
+        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+    }
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
-    public function login(#[CurrentUser] ?User $user): JsonResponse
+    public function apiLogin(#[CurrentUser] ?User $user): JsonResponse
     {
         if (null === $user) {
             return new JsonResponse([
@@ -53,8 +56,79 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/api/logout', name: 'api_logout')]
-    public function logout(): void
+    public function apiLogout(): void
     {
         throw new \LogicException('Este método nunca debería ser llamado. Está aquí solo por completitud.');
+    }
+
+    #[Route('/api/register', name: 'api_register', methods: ['POST'])]
+    public function register(
+        Request $request, 
+        UserPasswordHasherInterface $passwordHasher, 
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator
+    ): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        // Validar datos requeridos
+        if (!isset($data['email']) || !isset($data['password']) || !isset($data['username'])) {
+            return new JsonResponse([
+                'message' => 'Faltan datos requeridos (email, password, username)'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        
+        // Verificar si el email ya existe
+        $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+        if ($existingUser) {
+            return new JsonResponse([
+                'message' => 'El email ya está registrado'
+            ], Response::HTTP_CONFLICT);
+        }
+        
+        // Crear nuevo usuario
+        $user = new User();
+        $user->setEmail($data['email']);
+        $user->setUsername($data['username']);
+    
+        // Procesar roles si se envían
+        if (isset($data['roles']) && is_array($data['roles'])) {
+            $user->setRoles($data['roles']);
+        }
+    
+        // Hashear la contraseña
+        $hashedPassword = $passwordHasher->hashPassword(
+            $user,
+            $data['password']
+        );
+        $user->setPassword($hashedPassword);
+        
+        // Validar entidad
+        $errors = $validator->validate($user);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            
+            return new JsonResponse([
+                'message' => 'Error de validación',
+                'errors' => $errorMessages
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        
+        // Guardar en la base de datos
+        $entityManager->persist($user);
+        $entityManager->flush();
+        
+        return new JsonResponse([
+            'message' => 'Usuario registrado correctamente',
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'username' => $user->getUsername(),
+                'roles' => $user->getRoles()
+            ]
+        ], Response::HTTP_CREATED);
     }
 }

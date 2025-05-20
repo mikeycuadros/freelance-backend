@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ServiceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ServiceRepository::class)]
 class Service
@@ -12,24 +13,33 @@ class Service
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['service:read', 'user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['service:read', 'service:write', 'user:read'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['service:read', 'service:write'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['service:read', 'service:write', 'user:read'])]
     private ?float $price = null;
 
-    #[ORM\Column]
-    private ?int $delivery_time = null;
+    #[ORM\Column(length: 255)]
+    #[Groups(['service:read', 'service:write'])]
+    private ?string $delivery_time = null;
 
     #[ORM\ManyToOne(inversedBy: 'services')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['service:read', 'service:write'])]
     private ?Category $category = null;
 
     #[ORM\ManyToOne(inversedBy: 'services')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['service:read'])]
     private ?User $user = null;
 
     public function getId(): ?int
