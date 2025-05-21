@@ -14,6 +14,7 @@ class Client
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'client', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
     private ?User $userId = null;
 
     public function getId(): ?int

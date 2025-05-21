@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Entity\Category;
 use App\Entity\Chat;
 use App\Entity\Message;
-use App\Entity\Service;
+use App\Entity\Freelancer;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -25,6 +25,15 @@ class AppFixtures extends Fixture
         $user1->setRoles(['ROLE_FREELANCER']);
         $user1->setPassword($this->passwordHasher->hashPassword($user1, '123456'));
         $manager->persist($user1);
+
+        // Crear perfil de freelancer para usuario1
+        $freelancer = new Freelancer();
+        $freelancer->setUserId($user1);
+        $freelancer->setTitle('Desarrollador Web Full Stack');
+        $freelancer->setDescription('Especialista en desarrollo web con más de 5 años de experiencia en tecnologías frontend y backend. Experto en PHP, JavaScript, React y Symfony.');
+        $freelancer->setSkills(['PHP', 'JavaScript', 'React', 'Symfony', 'MySQL', 'Docker', 'Git']);
+        $freelancer->setHourlyRate(35);
+        $manager->persist($freelancer);
 
         $user2 = new User();
         $user2->setUsername('usuario2');

@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Client;
+use App\Entity\Freelancer;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -106,7 +108,7 @@ class SecurityController extends AbstractController
             $data['password']
         );
         $user->setPassword($hashedPassword);
-        
+    
         // Validar entidad
         $errors = $validator->validate($user);
         if (count($errors) > 0) {
@@ -120,11 +122,30 @@ class SecurityController extends AbstractController
                 'errors' => $errorMessages
             ], Response::HTTP_BAD_REQUEST);
         }
-        
-        // Guardar en la base de datos
+    
+        // Guardar primero el usuario para que tenga ID
         $entityManager->persist($user);
         $entityManager->flush();
-        
+    
+        // Ahora sí, crear Freelancer o Client si corresponde
+        if (in_array('ROLE_FREELANCER', $user->getRoles())) {
+            $freelancer = new Freelancer();
+            $freelancer->setUserId($user);
+            $freelancer->setTitle('Sin título');
+            $freelancer->setDescription('Sin descripción');
+            $freelancer->setSkills([]);
+            $freelancer->setHourlyRate('20');
+            $entityManager->persist($freelancer);
+        }
+        if (in_array('ROLE_CLIENT', $user->getRoles())) {
+            $client = new Client();
+            $client->setUserId($user);
+            $entityManager->persist($client);
+        }
+    
+        // Guardar las entidades relacionadas
+        $entityManager->flush();
+    
         return new JsonResponse([
             'message' => 'Usuario registrado correctamente',
             'user' => [
