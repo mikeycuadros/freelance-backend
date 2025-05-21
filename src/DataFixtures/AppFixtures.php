@@ -7,6 +7,7 @@ use App\Entity\Category;
 use App\Entity\Chat;
 use App\Entity\Message;
 use App\Entity\Freelancer;
+use App\Entity\Review;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -41,6 +42,22 @@ class AppFixtures extends Fixture
         $user2->setRoles(['ROLE_CLIENT']);
         $user2->setPassword($this->passwordHasher->hashPassword($user2, '123456'));
         $manager->persist($user2);
+
+        // Crear una reseña del usuario2 hacia el usuario1 (freelancer)
+        $review = new Review();
+        $review->setUser($user2);
+        $review->setFreelancer($freelancer);
+        $review->setRating(5);
+        $review->setComment('Excelente trabajo. El desarrollador entregó el proyecto antes de tiempo y con una calidad excepcional. Su conocimiento en React y Symfony es impresionante. Definitivamente volveré a contratarlo para futuros proyectos.');
+        $manager->persist($review);
+        
+        // Crear una segunda reseña para tener más datos
+        $review2 = new Review();
+        $review2->setUser($user2);
+        $review2->setFreelancer($freelancer);
+        $review2->setRating(4);
+        $review2->setComment('Muy buen trabajo en el desarrollo de mi sitio web. Resolvió todos los problemas técnicos rápidamente y la comunicación fue fluida. Recomendado para proyectos de desarrollo web.');
+        $manager->persist($review2);
 
         // Crear un chat entre los dos usuarios
         $chat = new Chat();

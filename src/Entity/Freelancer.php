@@ -42,6 +42,7 @@ class Freelancer
      * @var Collection<int, Review>
      */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'freelancer')]
+    #[Groups(['user:read'])]
     private Collection $reviews;
 
     public function __construct()

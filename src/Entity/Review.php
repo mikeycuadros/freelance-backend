@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ReviewRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
 class Review
@@ -12,18 +13,22 @@ class Review
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 2, nullable: true)]
+    #[Groups(['user:read'])]
     private ?string $rating = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read'])]
     private ?string $comment = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     private ?Freelancer $freelancer = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
+    #[Groups(['user:read'])]
     private ?User $user = null;
 
     public function getId(): ?int
