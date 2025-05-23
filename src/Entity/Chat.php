@@ -31,6 +31,7 @@ class Chat
      * @var Collection<int, Message>
      */
     #[ORM\OneToMany(targetEntity: Message::class, mappedBy: 'chat')]
+    #[Groups(['chat:read'])]
     private Collection $menssage;
 
     public function __construct()

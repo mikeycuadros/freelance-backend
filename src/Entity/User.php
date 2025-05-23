@@ -6,17 +6,18 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'chat:read'])]
+    #[Groups(['user:read', 'chat:read',  'freelancer:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -37,9 +38,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     #[Groups(['user:read', 'user:write', 'chat:read'])]
     private ?string $username = null;
-
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Service::class, orphanRemoval: true)]
-    private Collection $services;
 
     #[ORM\OneToOne(mappedBy: 'userId', cascade: ['persist', 'remove'])]
     #[Groups(['user:read'])]
@@ -68,7 +66,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->services = new ArrayCollection();
         $this->messages = new ArrayCollection();
         $this->chats = new ArrayCollection();
         $this->reviews = new ArrayCollection();
@@ -87,8 +84,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
-
         return $this;
+    }
+
+    public function getJWTCustomClaims(): array
+    {
+        return [
+            'email' => $this->getEmail(),
+            'roles' => $this->getRoles(),
+            // NO incluimos username aquí
+        ];
+    }
+
+    public static function createFromPayload($email, array $payload): self
+    {
+        $user = new self();
+        $user->setEmail($email); // El $email viene del payload JWT
+        
+        // Si el payload tiene roles, los asignamos
+        if (isset($payload['roles'])) {
+            $user->setRoles($payload['roles']);
+        }
+        
+        return $user;
     }
 
     /**
@@ -98,7 +116,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->username;
+        return (string) $this->email;
     }
 
     /**
@@ -157,36 +175,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Service>
-     */
-    public function getServices(): Collection
-    {
-        return $this->services;
-    }
-
-    public function addService(Service $service): static
-    {
-        if (!$this->services->contains($service)) {
-            $this->services->add($service);
-            $service->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeService(Service $service): static
-    {
-        if ($this->services->removeElement($service)) {
-            // set the owning side to null (unless already changed)
-            if ($service->getUser() === $this) {
-                $service->setUser(null);
-            }
-        }
 
         return $this;
     }

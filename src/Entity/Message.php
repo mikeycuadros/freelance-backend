@@ -13,20 +13,22 @@ class Message
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['message:read'])]
+    #[Groups(['message:read', 'chat:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['message:read'])]
+    #[Groups(['message:read', 'chat:read'])]
     private ?string $content = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]
+    #[Groups(['message:read', 'chat:read'])]
     private ?User $sender = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]
+    #[Groups(['message:read', 'chat:read'])]
     private ?User $receiver = null;
 
     #[ORM\ManyToOne(inversedBy: 'menssage')]

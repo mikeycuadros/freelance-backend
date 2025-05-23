@@ -2,36 +2,41 @@
 
 namespace App\Security;
 
-use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use App\Entity\User;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 
-class JWTSuccessHandler implements EventSubscriberInterface
+class JWTSuccessHandler implements AuthenticationSuccessHandlerInterface
 {
-    public static function getSubscribedEvents()
+    private $jwtManager;
+
+    public function __construct(JWTTokenManagerInterface $jwtManager)
     {
-        return [
-            'lexik_jwt_authentication.on_authentication_success' => 'onAuthenticationSuccess',
-        ];
+        $this->jwtManager = $jwtManager;
     }
 
-    public function onAuthenticationSuccess(AuthenticationSuccessEvent $event)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token): Response
     {
-        $data = $event->getData();
-        $user = $event->getUser();
+        $user = $token->getUser();
+        
+        // Usa el método create() que automáticamente usará getJWTCustomClaims()
+        // Con la configuración user_identity_field: email, el JWT tendrá email como identificador
+        $jwt = $this->jwtManager->create($user);
 
-        if (!$user instanceof User) {
-            return;
-        }
-
-        $data['user'] = [
-            'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'username' => $user->getUsername(),
-            'roles' => $user->getRoles(),
-            // Agrega aquí más campos si lo necesitas
+        $data = [
+            'token' => $jwt,
+            'user' => [
+                'id' => $user instanceof User ? $user->getId() : null,
+                'email' => $user->getUserIdentifier(),
+                'username' => $user instanceof User ? $user->getUsername() : null,
+                'roles' => $user->getRoles(),
+            ]
         ];
 
-        $event->setData($data);
+        return new JsonResponse($data);
     }
 }

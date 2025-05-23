@@ -15,27 +15,28 @@ class Freelancer
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'freelancer:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'freelancer', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['freelancer:read'])]
     private ?User $userId = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'freelancer:read'])]
     private ?string $title = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'freelancer:read'])]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::ARRAY)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'freelancer:read'])]
     private array $skills = [];
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'freelancer:read'])]
     private ?int $hourlyRate = null;
 
     /**

@@ -3,15 +3,20 @@
 namespace App\Controller;
 
 use App\Entity\Freelancer;
+use App\Entity\User;
 use App\Form\FreelancerType;
 use App\Repository\FreelancerRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-#[Route('/freelancer')]
 final class FreelancerController extends AbstractController
 {
     #[Route(name: 'app_freelancer_index', methods: ['GET'])]
@@ -77,5 +82,67 @@ final class FreelancerController extends AbstractController
         }
 
         return $this->redirectToRoute('app_freelancer_index', [], Response::HTTP_SEE_OTHER);
+    }
+    
+    
+    #[Route("/api/freelancers", name:"api_freelancer_index", methods:["GET"])]
+    public function apiIndex(FreelancerRepository $freelancerRepository, SerializerInterface $serializer): JsonResponse
+    {
+        $freelancers = $freelancerRepository->findAll();
+        $data = $serializer->serialize($freelancers, 'json', ['groups' => 'freelancer:read']);
+        
+        return new JsonResponse($data, Response::HTTP_OK, [], true);
+    }
+    
+    #[Route("/api/freelancers/{id}", name:"api_freelancer_show", methods:["GET"])]
+    public function apiShow(Freelancer $freelancer, SerializerInterface $serializer): JsonResponse
+    {
+        $jsonData = $serializer->serialize($freelancer, 'json', ['groups' => 'freelancer:read']);
+        
+        return new JsonResponse($jsonData, Response::HTTP_OK, [], true);
+    }
+    
+    #[Route("/api/freelancers/{id}", name:"api_freelancer_update", methods:["PUT", "PATCH"])]
+    public function apiUpdate(Request $request, Freelancer $freelancer, EntityManagerInterface $entityManager, SerializerInterface $serializer): JsonResponse
+    {
+        // Verificar que el usuario actual tiene permiso para actualizar este freelancer
+        $user = $this->getUser();
+        if (!$user || $freelancer->getUserId() !== $user) {
+            throw new AccessDeniedException('No tienes permiso para actualizar este perfil de freelancer');
+        }
+        
+        $data = json_decode($request->getContent(), true);
+        
+        // Actualizar los campos del freelancer con los datos recibidos
+        if (isset($data['title'])) {
+            $freelancer->setTitle($data['title']);
+        }
+        
+        if (isset($data['description'])) {
+            $freelancer->setDescription($data['description']);
+        }
+        
+        if (isset($data['hourlyRate'])) {
+            $freelancer->setHourlyRate((int)$data['hourlyRate']);
+        }
+        
+        if (isset($data['skills']) && is_array($data['skills'])) {
+            $freelancer->setSkills($data['skills']);
+        }
+        
+        $entityManager->flush();
+        
+        $jsonData = $serializer->serialize($freelancer, 'json', ['groups' => 'freelancer:read']);
+        
+        return new JsonResponse($jsonData, Response::HTTP_OK, [], true);
+    }
+    
+    #[Route("/api/freelancers/{id}", name:"api_freelancer_delete", methods:["DELETE"])]
+    public function apiDelete(Freelancer $freelancer, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $entityManager->remove($freelancer);
+        $entityManager->flush();
+        
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

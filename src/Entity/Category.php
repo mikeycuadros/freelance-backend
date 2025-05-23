@@ -3,8 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CategoryRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -18,7 +17,7 @@ class Category
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['category:read', 'category:write', 'service:read'])]
+    #[Groups(['category:read', 'category:write'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -29,14 +28,14 @@ class Category
     #[Groups(['category:read'])]
     private ?string $description = null;
 
-    #[ORM\OneToMany(mappedBy: 'category', targetEntity: Service::class)]
+    #[ORM\Column(type: Types::ARRAY)]
     #[Groups(['category:read'])]
-    private Collection $services;
+    private array $skills = [];
 
 
     public function __construct()
     {
-        $this->services = new ArrayCollection();
+        
     }
 
     public function getId(): ?int
@@ -80,43 +79,16 @@ class Category
         return $this;
     }
 
-    /**
-     * @return Collection<int, Service>
-     */
-    public function getServices(): Collection
+    public function getSkills(): array
     {
-        return $this->services;
+        return $this->skills;
     }
 
-    public function addService(Service $service): static
+    public function setSkills(array $skills): static
     {
-        if (!$this->services->contains($service)) {
-            $this->services->add($service);
-            $service->setCategory($this);
-        }
+        $this->skills = $skills;
 
         return $this;
-    }
-
-    public function removeService(Service $service): static
-    {
-        if ($this->services->removeElement($service)) {
-            // set the owning side to null (unless already changed)
-            if ($service->getCategory() === $this) {
-                $service->setCategory(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Obtiene el número de servicios en esta categoría
-     * @Groups(["category:read"])
-     */
-    public function getServiceCount(): int
-    {
-        return $this->services->count();
     }
 
 }

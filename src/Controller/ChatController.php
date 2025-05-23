@@ -81,12 +81,21 @@ final class ChatController extends AbstractController
     }
 
     #[Route('/api/chats', name: 'api_chat_index', methods: ['GET'])]
-    public function apiIndex(ChatRepository $chatRepository, SerializerInterface $serializer): JsonResponse
+    public function apiIndex(ChatRepository $chatRepository): JsonResponse
     {
-        $chats = $chatRepository->findAll();
-        $data = $serializer->serialize($chats, 'json', ['groups' => 'chat:read']);
+        $user = $this->getUser();
         
-        return new JsonResponse($data, Response::HTTP_OK, [], true);
+        // Verificar si el usuario está autenticado
+        if (!$user) {
+            return $this->json([
+                'message' => 'Necesitas iniciar sesión para ver tus chats',
+                'status' => 'error'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+        
+        // Usar el método findByUser() para obtener los chats donde participa el usuario
+        $chats = $chatRepository->findByUser($user);
+        return $this->json($chats, 200, [], ['groups' => 'chat:read']);
     }
 
     #[Route('/api/chats/{id}', name: 'api_chat_show', methods: ['GET'])]
