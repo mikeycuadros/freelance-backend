@@ -56,10 +56,13 @@ security:
     - { path: ^/api/users/\d+$, roles: PUBLIC_ACCESS }
     - { path: ^/api/categories, roles: PUBLIC_ACCESS }
     - { path: ^/api/categories/\d+$, roles: PUBLIC_ACCESS }
-    - { path: ^/api/chats, roles: IS_AUTHENTICATED_FULLY }
-    - { path: ^/api/chats/\d+$, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/api/freelancers, roles: PUBLIC_ACCESS }
     - { path: ^/api/freelancers/\d+$, roles: PUBLIC_ACCESS }
+    - { path: ^/api/chats, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/api/chats/\d+$, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/api/messages, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/api/messages/\d+$, roles: IS_AUTHENTICATED_FULLY }
+    
 
     # Solo ADMIN puede crear, editar o borrar categorias
     - { path: ^/api/categories$, roles: ROLE_ADMIN, methods: [POST] }

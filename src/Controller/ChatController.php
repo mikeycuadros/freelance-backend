@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Chat;
+use App\Entity\User;
 use App\Form\ChatType;
 use App\Repository\ChatRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -111,7 +112,26 @@ final class ChatController extends AbstractController
     {
         $content = $request->getContent();
         try {
-            $chat = $serializer->deserialize($content, Chat::class, 'json');
+            // Decodificar el JSON para obtener los IDs de usuario
+            $data = json_decode($content, true);
+            
+            if (!isset($data['user1_id']) || !isset($data['user2_id'])) {
+                return new JsonResponse(['error' => 'Se requieren user1_id y user2_id'], Response::HTTP_BAD_REQUEST);
+            }
+            
+            // Buscar los usuarios por ID
+            $userRepository = $entityManager->getRepository(User::class);
+            $user1 = $userRepository->find($data['user1_id']);
+            $user2 = $userRepository->find($data['user2_id']);
+            
+            if (!$user1 || !$user2) {
+                return new JsonResponse(['error' => 'Uno o ambos usuarios no existen'], Response::HTTP_BAD_REQUEST);
+            }
+            
+            // Crear el nuevo chat
+            $chat = new Chat();
+            $chat->setUser1($user1);
+            $chat->setUser2($user2);
             
             $entityManager->persist($chat);
             $entityManager->flush();

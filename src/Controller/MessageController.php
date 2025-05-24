@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use App\Entity\Chat;
+use App\Entity\User;
 
 final class MessageController extends AbstractController
 {
@@ -103,6 +105,33 @@ final class MessageController extends AbstractController
         $content = $request->getContent();
         try {
             $message = $serializer->deserialize($content, Message::class, 'json');
+            
+            // Obtener los IDs de los parámetros de consulta
+            $chatId = $request->query->get('chatId');
+            $senderId = $request->query->get('senderId');
+            $receiverId = $request->query->get('receiverId');
+            
+            // Buscar las entidades correspondientes
+            if ($chatId) {
+                $chat = $entityManager->getRepository(Chat::class)->find($chatId);
+                if ($chat) {
+                    $message->setChat($chat);
+                }
+            }
+            
+            if ($senderId) {
+                $sender = $entityManager->getRepository(User::class)->find($senderId);
+                if ($sender) {
+                    $message->setSender($sender);
+                }
+            }
+            
+            if ($receiverId) {
+                $receiver = $entityManager->getRepository(User::class)->find($receiverId);
+                if ($receiver) {
+                    $message->setReceiver($receiver);
+                }
+            }
             
             $entityManager->persist($message);
             $entityManager->flush();
