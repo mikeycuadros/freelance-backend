@@ -62,6 +62,8 @@ security:
     - { path: ^/api/chats/\d+$, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/api/messages, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/api/messages/\d+$, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/api/reviews, roles: IS_AUTHENTICATED_FULLY }
+    - { path: ^/api/reviews/\d+$, roles: IS_AUTHENTICATED_FULLY }
     
 
     # Solo ADMIN puede crear, editar o borrar categorias

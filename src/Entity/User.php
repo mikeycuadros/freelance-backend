@@ -21,11 +21,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user:read', 'user:write', 'chat:read'])]
+    #[Groups(['user:read', 'user:write', 'chat:read', 'freelancer:read'])]
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'freelancer:read'])]
     private array $roles = [];
 
     /**
@@ -36,11 +36,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:write', 'chat:read'])]
+    #[Groups(['user:read', 'user:write', 'chat:read', 'freelancer:read'])]
     private ?string $username = null;
 
     #[ORM\OneToOne(mappedBy: 'userId', cascade: ['persist', 'remove'])]
-    #[Groups(['user:read'])]
     private ?Freelancer $freelancer = null;
 
     #[ORM\OneToOne(mappedBy: 'userId', cascade: ['persist', 'remove'])]

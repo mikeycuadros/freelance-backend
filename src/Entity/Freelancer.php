@@ -43,8 +43,12 @@ class Freelancer
      * @var Collection<int, Review>
      */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'freelancer')]
-    #[Groups(['user:read'])]
+    #[Groups(['freelancer:read'])]
     private Collection $reviews;
+
+    #[ORM\Column]
+    #[Groups(['user:read', 'freelancer:read'])]
+    private ?\DateTimeImmutable $createdAt = null;
 
     public function __construct()
     {
@@ -142,6 +146,18 @@ class Freelancer
                 $review->setFreelancer(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }

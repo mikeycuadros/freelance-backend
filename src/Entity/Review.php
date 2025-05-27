@@ -13,35 +13,39 @@ class Review
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'freelancer:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 2, nullable: true)]
-    #[Groups(['user:read'])]
-    private ?string $rating = null;
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    #[Groups(['user:read', 'freelancer:read'])]
+    private ?int $rating = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'freelancer:read'])]
     private ?string $comment = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
     private ?Freelancer $freelancer = null;
 
     #[ORM\ManyToOne(inversedBy: 'reviews')]
-    #[Groups(['user:read'])]
+    #[Groups(['freelancer:read'])]
     private ?User $user = null;
+
+    #[ORM\Column]
+    #[Groups(['user:read'])]
+    private ?\DateTimeImmutable $createdAt = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getRating(): ?string
+    public function getRating(): ?int
     {
         return $this->rating;
     }
 
-    public function setRating(?string $rating): static
+    public function setRating(?int $rating): static
     {
         $this->rating = $rating;
 
@@ -80,6 +84,18 @@ class Review
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }

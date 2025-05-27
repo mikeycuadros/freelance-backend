@@ -34,6 +34,7 @@ class AppFixtures extends Fixture
         $freelancer->setDescription('Especialista en desarrollo web con más de 5 años de experiencia en tecnologías frontend y backend. Experto en PHP, JavaScript, React y Symfony.');
         $freelancer->setSkills(['PHP', 'JavaScript', 'React', 'Symfony', 'MySQL', 'Docker', 'Git']);
         $freelancer->setHourlyRate(35);
+        $freelancer->setCreatedAt(new \DateTimeImmutable('-6 months'));
         $manager->persist($freelancer);
 
         $user2 = new User();
@@ -49,6 +50,7 @@ class AppFixtures extends Fixture
         $review->setFreelancer($freelancer);
         $review->setRating(5);
         $review->setComment('Excelente trabajo. El desarrollador entregó el proyecto antes de tiempo y con una calidad excepcional. Su conocimiento en React y Symfony es impresionante. Definitivamente volveré a contratarlo para futuros proyectos.');
+        $review->setCreatedAt(new \DateTimeImmutable('-2 months'));
         $manager->persist($review);
         
         // Crear una segunda reseña para tener más datos
@@ -57,6 +59,7 @@ class AppFixtures extends Fixture
         $review2->setFreelancer($freelancer);
         $review2->setRating(4);
         $review2->setComment('Muy buen trabajo en el desarrollo de mi sitio web. Resolvió todos los problemas técnicos rápidamente y la comunicación fue fluida. Recomendado para proyectos de desarrollo web.');
+        $review2->setCreatedAt(new \DateTimeImmutable('-1 month'));
         $manager->persist($review2);
 
         // Crear un chat entre los dos usuarios
@@ -105,6 +108,7 @@ class AppFixtures extends Fixture
         $freelancer3->setDescription('Diseñadora con 7 años de experiencia creando interfaces intuitivas y atractivas. Especializada en experiencia de usuario y diseño de interfaces para aplicaciones web y móviles.');
         $freelancer3->setSkills(['UI/UX', 'Figma', 'Sketch', 'Adobe XD', 'Photoshop', 'Illustrator', 'Diseño de Logos', 'Wireframing', 'Prototipos']);
         $freelancer3->setHourlyRate(40);
+        $freelancer3->setCreatedAt(new \DateTimeImmutable('-5 months'));
         $manager->persist($freelancer3);
 
         // Usuario 4 - Desarrollador Móvil
@@ -121,6 +125,7 @@ class AppFixtures extends Fixture
         $freelancer4->setDescription('Especialista en desarrollo de aplicaciones nativas para iOS y Android. Experiencia en Flutter para desarrollo multiplataforma y en integración con APIs REST.');
         $freelancer4->setSkills(['Swift', 'Kotlin', 'Flutter', 'React Native', 'Firebase', 'RESTful APIs', 'Git', 'Android Studio', 'Xcode']);
         $freelancer4->setHourlyRate(45);
+        $freelancer4->setCreatedAt(new \DateTimeImmutable('-4 months'));
         $manager->persist($freelancer4);
 
         // Usuario 5 - Especialista en Marketing Digital
@@ -137,6 +142,7 @@ class AppFixtures extends Fixture
         $freelancer5->setDescription('Experta en estrategias de marketing digital, posicionamiento SEO y campañas SEM. Enfoque en análisis de datos y optimización de conversiones.');
         $freelancer5->setSkills(['SEO', 'SEM', 'Google Ads', 'Facebook Ads', 'Instagram Ads', 'Email Marketing', 'Análisis de Datos', 'Google Analytics', 'Marketing de Contenidos']);
         $freelancer5->setHourlyRate(38);
+        $freelancer5->setCreatedAt(new \DateTimeImmutable('-3 months'));
         $manager->persist($freelancer5);
 
         // Usuario 6 - Científico de Datos
@@ -153,6 +159,7 @@ class AppFixtures extends Fixture
         $freelancer6->setDescription('Especialista en análisis de datos, modelos predictivos y aprendizaje automático. Experiencia en proyectos de big data y visualización de datos.');
         $freelancer6->setSkills(['Python', 'R', 'SQL', 'Machine Learning', 'Deep Learning', 'Pandas', 'TensorFlow', 'Scikit-learn', 'Tableau', 'Power BI']);
         $freelancer6->setHourlyRate(50);
+        $freelancer6->setCreatedAt(new \DateTimeImmutable('-2 months'));
         $manager->persist($freelancer6);
 
         // Usuario 7 - Redactor de Contenidos
@@ -169,6 +176,7 @@ class AppFixtures extends Fixture
         $freelancer7->setDescription('Redactora especializada en contenidos optimizados para SEO. Experiencia en blogs, artículos, copywriting y traducción español-inglés.');
         $freelancer7->setSkills(['Copywriting', 'Redacción SEO', 'Blogs', 'Artículos', 'Traducción', 'Corrección', 'Marketing de Contenidos']);
         $freelancer7->setHourlyRate(30);
+        $freelancer7->setCreatedAt(new \DateTimeImmutable('-1 month'));
         $manager->persist($freelancer7);
 
         // Usuario 8 - Cliente adicional
@@ -185,6 +193,7 @@ class AppFixtures extends Fixture
         $review3->setFreelancer($freelancer3);
         $review3->setRating(5);
         $review3->setComment('María diseñó una interfaz increíble para nuestra aplicación. Su trabajo en UX/UI transformó completamente la experiencia de usuario. Muy profesional y creativa.');
+        $review3->setCreatedAt(new \DateTimeImmutable('-3 weeks'));
         $manager->persist($review3);
 
         $review4 = new Review();
@@ -192,6 +201,7 @@ class AppFixtures extends Fixture
         $review4->setFreelancer($freelancer4);
         $review4->setRating(4);
         $review4->setComment('Carlos desarrolló nuestra app para iOS y Android con gran calidad. El código es limpio y la app funciona perfectamente en ambas plataformas.');
+        $review4->setCreatedAt(new \DateTimeImmutable('-2 weeks'));
         $manager->persist($review4);
 
         $review5 = new Review();
@@ -199,6 +209,7 @@ class AppFixtures extends Fixture
         $review5->setFreelancer($freelancer5);
         $review5->setRating(5);
         $review5->setComment('Ana implementó una estrategia de marketing digital que aumentó nuestro tráfico web en un 200%. Su conocimiento en SEO y publicidad en redes sociales es excelente.');
+        $review5->setCreatedAt(new \DateTimeImmutable('-1 week'));
         $manager->persist($review5);
 
         $categories = [

@@ -135,6 +135,7 @@ class SecurityController extends AbstractController
             $freelancer->setDescription('Sin descripción');
             $freelancer->setSkills([]);
             $freelancer->setHourlyRate('20');
+            $freelancer->setCreatedAt(new \DateTimeImmutable()); // Establecer fecha de registro
             $entityManager->persist($freelancer);
         }
         if (in_array('ROLE_CLIENT', $user->getRoles())) {
