@@ -8,6 +8,8 @@ use App\Entity\Chat;
 use App\Entity\Message;
 use App\Entity\Freelancer;
 use App\Entity\Review;
+use App\Entity\Experience;
+use App\Entity\Portfolio;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -35,6 +37,41 @@ class AppFixtures extends Fixture
         $freelancer->setSkills(['PHP', 'JavaScript', 'React', 'Symfony', 'MySQL', 'Docker', 'Git']);
         $freelancer->setHourlyRate(35);
         $freelancer->setCreatedAt(new \DateTimeImmutable('-6 months'));
+        
+        // Crear y añadir experiencias para el freelancer
+        $experience1 = new Experience();
+        $experience1->setCompany('Tech Solutions');
+        $experience1->setPosition('Backend Developer');
+        $experience1->setStartDate(new \DateTime('2018-01-01'));
+        $experience1->setEndDate(new \DateTime('2020-12-31'));
+        $experience1->setDescription('Desarrollo de APIs RESTful y mantenimiento de bases de datos MySQL.');
+        $experience1->setFreelancer($freelancer);
+        $manager->persist($experience1);
+        
+        $experience2 = new Experience();
+        $experience2->setCompany('Web Innovators');
+        $experience2->setPosition('Full Stack Developer');
+        $experience2->setStartDate(new \DateTime('2021-01-01'));
+        $experience2->setEndDate(new \DateTime('2023-12-31'));
+        $experience2->setDescription('Desarrollo de aplicaciones web usando React y Symfony.');
+        $experience2->setFreelancer($freelancer);
+        $manager->persist($experience2);
+        
+        // Crear y añadir portfolios para el freelancer
+        $portfolio1 = new Portfolio();
+        $portfolio1->setTitle('Sistema de Gestión de Inventario');
+        $portfolio1->setDescription('Desarrollo de un sistema completo de gestión de inventario con React y Symfony.');
+        $portfolio1->setUrl('https://ejemplo.com/inventario');
+        $portfolio1->setFreelancer($freelancer);
+        $manager->persist($portfolio1);
+        
+        $portfolio2 = new Portfolio();
+        $portfolio2->setTitle('Plataforma E-commerce');
+        $portfolio2->setDescription('Creación de una tienda online con carrito de compras, pasarela de pagos y panel de administración.');
+        $portfolio2->setUrl('https://ejemplo.com/ecommerce');
+        $portfolio2->setFreelancer($freelancer);
+        $manager->persist($portfolio2);
+        
         $manager->persist($freelancer);
 
         $user2 = new User();
@@ -109,6 +146,26 @@ class AppFixtures extends Fixture
         $freelancer3->setSkills(['UI/UX', 'Figma', 'Sketch', 'Adobe XD', 'Photoshop', 'Illustrator', 'Diseño de Logos', 'Wireframing', 'Prototipos']);
         $freelancer3->setHourlyRate(40);
         $freelancer3->setCreatedAt(new \DateTimeImmutable('-5 months'));
+        
+        // Crear y añadir experiencias para el freelancer3
+        $experience3 = new Experience();
+        $experience3->setCompany('Creative Studio');
+        $experience3->setPosition('UX Designer');
+        $experience3->setStartDate(new \DateTime('2016-01-01'));
+        $experience3->setEndDate(new \DateTime('2019-12-31'));
+        $experience3->setDescription('Diseño de interfaces para aplicaciones móviles.');
+        $experience3->setFreelancer($freelancer3);
+        $manager->persist($experience3);
+        
+        $experience4 = new Experience();
+        $experience4->setCompany('DesignPro');
+        $experience4->setPosition('UI/UX Lead');
+        $experience4->setStartDate(new \DateTime('2020-01-01'));
+        $experience4->setEndDate(new \DateTime('2023-12-31'));
+        $experience4->setDescription('Liderazgo de proyectos de diseño web y experiencia de usuario.');
+        $experience4->setFreelancer($freelancer3);
+        $manager->persist($experience4);
+        
         $manager->persist($freelancer3);
 
         // Usuario 4 - Desarrollador Móvil

@@ -130,6 +130,122 @@ final class FreelancerController extends AbstractController
             $freelancer->setSkills($data['skills']);
         }
         
+        // Actualizar experiencias
+        if (isset($data['experiences']) && is_array($data['experiences'])) {
+            // Eliminar experiencias existentes que no están en la nueva lista
+            foreach ($freelancer->getExperiences() as $existingExperience) {
+                $found = false;
+                foreach ($data['experiences'] as $expData) {
+                    if (isset($expData['id']) && $expData['id'] === $existingExperience->getId()) {
+                        $found = true;
+                        break;
+                    }
+                }
+                
+                if (!$found) {
+                    $entityManager->remove($existingExperience);
+                }
+            }
+            
+            // Actualizar o crear nuevas experiencias
+            foreach ($data['experiences'] as $expData) {
+                $experience = null;
+                
+                // Si tiene ID, buscar la experiencia existente
+                if (isset($expData['id'])) {
+                    foreach ($freelancer->getExperiences() as $existingExperience) {
+                        if ($existingExperience->getId() === $expData['id']) {
+                            $experience = $existingExperience;
+                            break;
+                        }
+                    }
+                }
+                
+                // Si no se encontró, crear una nueva experiencia
+                if (!$experience) {
+                    $experience = new \App\Entity\Experience();
+                    $experience->setFreelancer($freelancer);
+                }
+                
+                // Actualizar los campos de la experiencia
+                if (isset($expData['company'])) {
+                    $experience->setCompany($expData['company']);
+                }
+                
+                if (isset($expData['position'])) {
+                    $experience->setPosition($expData['position']);
+                }
+                
+                if (isset($expData['description'])) {
+                    $experience->setDescription($expData['description']);
+                }
+                
+                if (isset($expData['startDate'])) {
+                    $experience->setStartDate(new \DateTime($expData['startDate']));
+                }
+                
+                if (isset($expData['endDate'])) {
+                    $experience->setEndDate(new \DateTime($expData['endDate']));
+                }
+                
+                $entityManager->persist($experience);
+            }
+        }
+        
+        // Actualizar portfolio
+        if (isset($data['portfolios']) && is_array($data['portfolios'])) {
+            // Eliminar portfolios existentes que no están en la nueva lista
+            foreach ($freelancer->getPortfolios() as $existingPortfolio) {
+                $found = false;
+                foreach ($data['portfolios'] as $portData) {
+                    if (isset($portData['id']) && $portData['id'] === $existingPortfolio->getId()) {
+                        $found = true;
+                        break;
+                    }
+                }
+                
+                if (!$found) {
+                    $entityManager->remove($existingPortfolio);
+                }
+            }
+            
+            // Actualizar o crear nuevos portfolios
+            foreach ($data['portfolios'] as $portData) {
+                $portfolio = null;
+                
+                // Si tiene ID, buscar el portfolio existente
+                if (isset($portData['id'])) {
+                    foreach ($freelancer->getPortfolios() as $existingPortfolio) {
+                        if ($existingPortfolio->getId() === $portData['id']) {
+                            $portfolio = $existingPortfolio;
+                            break;
+                        }
+                    }
+                }
+                
+                // Si no se encontró, crear un nuevo portfolio
+                if (!$portfolio) {
+                    $portfolio = new \App\Entity\Portfolio();
+                    $portfolio->setFreelancer($freelancer);
+                }
+                
+                // Actualizar los campos del portfolio
+                if (isset($portData['title'])) {
+                    $portfolio->setTitle($portData['title']);
+                }
+                
+                if (isset($portData['description'])) {
+                    $portfolio->setDescription($portData['description']);
+                }
+                
+                if (isset($portData['url'])) {
+                    $portfolio->setUrl($portData['url']);
+                }
+                
+                $entityManager->persist($portfolio);
+            }
+        }
+        
         $entityManager->flush();
         
         $jsonData = $serializer->serialize($freelancer, 'json', ['groups' => 'freelancer:read']);

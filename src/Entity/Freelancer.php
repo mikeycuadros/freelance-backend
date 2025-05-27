@@ -50,9 +50,25 @@ class Freelancer
     #[Groups(['user:read', 'freelancer:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
+    /**
+     * @var Collection<int, Experience>
+     */
+    #[ORM\OneToMany(targetEntity: Experience::class, mappedBy: 'freelancer')]
+    #[Groups(['freelancer:read'])]
+    private Collection $experiences;
+
+    /**
+     * @var Collection<int, Portfolio>
+     */
+    #[ORM\OneToMany(targetEntity: Portfolio::class, mappedBy: 'freelancer')]
+    #[Groups(['freelancer:read'])]
+    private Collection $portfolios;
+
     public function __construct()
     {
         $this->reviews = new ArrayCollection();
+        $this->experiences = new ArrayCollection();
+        $this->portfolios = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -158,6 +174,66 @@ class Freelancer
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Experience>
+     */
+    public function getExperiences(): Collection
+    {
+        return $this->experiences;
+    }
+
+    public function addExperience(Experience $experience): static
+    {
+        if (!$this->experiences->contains($experience)) {
+            $this->experiences->add($experience);
+            $experience->setFreelancer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExperience(Experience $experience): static
+    {
+        if ($this->experiences->removeElement($experience)) {
+            // set the owning side to null (unless already changed)
+            if ($experience->getFreelancer() === $this) {
+                $experience->setFreelancer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Portfolio>
+     */
+    public function getPortfolios(): Collection
+    {
+        return $this->portfolios;
+    }
+
+    public function addPortfolio(Portfolio $portfolio): static
+    {
+        if (!$this->portfolios->contains($portfolio)) {
+            $this->portfolios->add($portfolio);
+            $portfolio->setFreelancer($this);
+        }
+
+        return $this;
+    }
+
+    public function removePortfolio(Portfolio $portfolio): static
+    {
+        if ($this->portfolios->removeElement($portfolio)) {
+            // set the owning side to null (unless already changed)
+            if ($portfolio->getFreelancer() === $this) {
+                $portfolio->setFreelancer(null);
+            }
+        }
 
         return $this;
     }
