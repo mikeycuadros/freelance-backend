@@ -64,7 +64,6 @@ security:
     - { path: ^/api/messages/\d+$, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/api/reviews, roles: IS_AUTHENTICATED_FULLY }
     - { path: ^/api/reviews/\d+$, roles: IS_AUTHENTICATED_FULLY }
-    
 
     # Solo ADMIN puede crear, editar o borrar categorias
     - { path: ^/api/categories$, roles: ROLE_ADMIN, methods: [POST] }
@@ -77,6 +76,9 @@ security:
         methods: [PUT, DELETE],
       }
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+
+    # Rutas de administración solo para ROLE_ADMIN
+    - { path: ^/api/admin, roles: ROLE_ADMIN }
 
 when@test:
   security:
